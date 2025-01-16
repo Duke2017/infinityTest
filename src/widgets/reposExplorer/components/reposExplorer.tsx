@@ -1,10 +1,10 @@
 'use client';
 import { RepoCard } from '@/entities/repositories';
 import { useRepositoriesByOwnerQuery } from '@/entities/repositories/gql/queries/repositoriesByOwner.graphql';
+import { InfinityScrollPoint } from '@/shared/components/ui/InfinityScrollPoint';
 import { Input } from '@/shared/components/ui/Input';
 import { Spinner } from '@/shared/components/ui/Spinner';
-import { useState, useCallback } from 'react';
-import { InView } from 'react-intersection-observer';
+import { useState } from 'react';
 
 export const ReposExplorer = () => {
   const [login, setLogin] = useState('');
@@ -26,14 +26,6 @@ export const ReposExplorer = () => {
   const endCursor =
     data?.repositoryOwner?.repositories.pageInfo.endCursor || null;
   const repos = data?.repositoryOwner?.repositories.nodes;
-
-  const loadMoreRepos = useCallback(() => {
-    fetchMore({
-      variables: {
-        cursor: endCursor,
-      },
-    });
-  }, [endCursor, fetchMore]);
 
   return (
     <div className="flex flex-col gap-8 w-full max-w-prose">
@@ -62,15 +54,11 @@ export const ReposExplorer = () => {
       )}
       {!!login && !isLoading && !repos?.length && <p>Репозитории не найдены</p>}
       {isLoading && <Spinner className="self-center" />}
-      {hasNextPage && login && !isLoading && (
-        <InView
-          onChange={inView => {
-            if (inView) {
-              loadMoreRepos();
-            }
-          }}
-        />
-      )}
+      <InfinityScrollPoint
+        hasNextPage={Boolean(hasNextPage && login && !isLoading)}
+        endCursor={endCursor}
+        fetchMore={fetchMore}
+      />
     </div>
   );
 };
