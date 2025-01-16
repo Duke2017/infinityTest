@@ -32,29 +32,6 @@ export const ReposExplorer = () => {
       variables: {
         cursor: endCursor,
       },
-      updateQuery: (previousResult, { fetchMoreResult }) => {
-        const newEntries =
-          fetchMoreResult.repositoryOwner?.repositories.nodes || [];
-        const endCursor =
-          fetchMoreResult.repositoryOwner?.repositories.pageInfo.endCursor;
-        const hasNextPage =
-          fetchMoreResult.repositoryOwner?.repositories.pageInfo.hasNextPage ??
-          false;
-        return {
-          repositoryOwner: {
-            repositories: {
-              pageInfo: {
-                endCursor,
-                hasNextPage,
-              },
-              nodes: [
-                ...(previousResult.repositoryOwner?.repositories.nodes || []),
-                ...newEntries,
-              ],
-            },
-          },
-        };
-      },
     });
   }, [endCursor, fetchMore]);
 

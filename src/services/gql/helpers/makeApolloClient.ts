@@ -2,7 +2,7 @@ import {
   ApolloClient,
   InMemoryCache,
 } from '@apollo/experimental-nextjs-app-support';
-import { from } from '@apollo/client';
+import { ApolloLink, from } from '@apollo/client';
 import { ContextSetter, setContext } from '@apollo/client/link/context';
 import { onError as makeErrorLink } from '@apollo/client/link/error';
 import { HttpLink } from '@apollo/client/link/http';
@@ -27,12 +27,26 @@ interface MakeMainLinkProps {
   apolloUri: string;
 }
 
+const addTypenameLink = new ApolloLink((operation, forward) => {
+  return forward(operation).map(response => {
+    if (response.data?.repositoryOwner) {
+      response.data.repositoryOwner.__typename = 'RepositoryOwner';
+    }
+    return response;
+  });
+});
+
 const makeMainLink = ({ apolloUri }: MakeMainLinkProps) => {
   const authLink = setContext(makeGetHeadersContext());
 
   const httpLink = new HttpLink({ uri: apolloUri });
 
-  return from([makeErrorLink(res => console.error(res)), authLink, httpLink]);
+  return from([
+    addTypenameLink,
+    makeErrorLink(res => console.error(res)),
+    authLink,
+    httpLink,
+  ]);
 };
 
 /**
