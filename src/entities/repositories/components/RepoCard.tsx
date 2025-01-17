@@ -1,10 +1,11 @@
+import { memo } from 'react';
 import { RepositoryFragment } from '../gql/fragments/repository.graphql';
 
 interface Props {
   repo: RepositoryFragment;
 }
 
-export const RepoCard = ({ repo }: Props) => {
+export const RepoCard = memo(function RepoCard({ repo }: Props) {
   return (
     <div className="flex p-4 prose border rounded-lg">
       <div className="flex-1">
@@ -18,4 +19,4 @@ export const RepoCard = ({ repo }: Props) => {
       <code className="text-xs text-slate-500">{repo.updatedAt}</code>
     </div>
   );
-};
+});
